@@ -1,0 +1,125 @@
+name: Build CPU-only Wheels
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag of text-generation-webui to build: v0.1.0'
+        default: 'v0.1.0'
+        required: true
+        type: string
+      config:
+        description: 'Override configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
+        default: 'Default'
+        required: false
+        type: string
+      exclude:
+        description: 'Exclude build configurations: key1-1:item1-1,key1-2:item1-2;key2-1:item2-1,key2-2:item2-2'
+        default: 'None'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version tag of text-generation-webui to build: v0.1.0'
+        default: 'v0.1.0'
+        required: true
+        type: string
+      config:
+        description: 'Configurations to build: key1:item1-1,item1-2;key2:item2-1,item2-2'
+        default: 'Default'
+        required: false
+        type: string
+      exclude:
+        description: 'Exclude build configurations: key1-1:item1-1,key1-2:item1-2;key2-1:item2-1,key2-2:item2-2'
+        default: 'None'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  define_matrix:
+    name: Define Build Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CONFIGIN: ${{ inputs.config }}
+      EXCLUDEIN: ${{ inputs.exclude }}
+
+    steps:
+      - name: Define Job Output
+        id: set-matrix
+        run: |
+          $matrix = @{
+              'os' = @('ubuntu-22.04', 'windows-2019')
+              'pyver' = @("3.11")
+              'avx' = @("AVX", "AVX2")
+          }
+
+          if ($env:CONFIGIN -ne 'Default') {$env:CONFIGIN.split(';').foreach({$matrix[$_.split(':')[0]] = $_.split(':')[1].split(',')})}
+
+          if ($env:EXCLUDEIN -ne 'None') {
+              $exclusions = @()
+              $exclusions += $env:EXCLUDEIN.split(';').replace(':','=').replace(',',"`n") | ConvertFrom-StringData
+              $matrix['exclude'] = $exclusions
+          }
+
+          $matrixOut = ConvertTo-Json $matrix -Compress
+          Write-Output ('matrix=' + $matrixOut) >> $env:GITHUB_OUTPUT
+
+  build_wheels:
+    name: ${{ matrix.os }} ${{ matrix.pyver }} CPU ${{ matrix.avx }}
+    needs: define_matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{ fromJSON(needs.define_matrix.outputs.matrix) }}
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      AVXVER: ${{ matrix.avx }}
+      PCKGVER: ${{ inputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'oobabooga/test-repo'
+          ref: ${{ inputs.version }}
+          submodules: 'recursive'
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.pyver }}
+
+      - name: Build Package
+        run: |
+          rm -rf .github
+          cd ..
+          curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz
+          tar -xzf python-build.tar.gz
+          mv python test-repo/portable_env
+          zip -r test-repo.zip test-repo
+
+      - name: Upload files to a GitHub release
+        id: upload-release
+        uses: svenstaro/upload-release-action@2.7.0
+        continue-on-error: true
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: test-repo.zip
+          tag: ${{ inputs.version }}
+          file_glob: true
+          make_latest: false
+          overwrite: true
+
+      - uses: actions/upload-artifact@v4
+        if: steps.upload-release.outcome == 'failure'
+        with:
+          name: cpu
+          path: ./dist/*.whl
