@@ -105,29 +105,26 @@ jobs:
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
               curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-pc-windows-msvc-install_only.tar.gz
+              PLATFORM="windows"
             elif [[ "$RUNNER_OS" == "macOS" ]]; then
               # macos-13 is Intel, macos-14/15/latest are ARM
               if [[ "${{ matrix.os }}" == "macos-13" ]]; then
                 curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-apple-darwin-install_only.tar.gz
-                ARCH="x86_64"
+                PLATFORM="macos-x86_64"
               else
                 curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-aarch64-apple-darwin-install_only.tar.gz
-                ARCH="arm64"
+                PLATFORM="macos-arm64"
               fi
             else
               # Linux case
               curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz
+              PLATFORM="linux"
             fi
 
             tar -xzf python-build.tar.gz
             mv python test-repo/portable_env
 
-            # Simplified ZIP naming
-            if [[ "$RUNNER_OS" == "macOS" ]]; then
-              ZIP_NAME="test-repo-${{ inputs.version }}-${{ matrix.os }}-$ARCH.zip"
-            else
-              ZIP_NAME="test-repo-${{ inputs.version }}-${{ matrix.os }}.zip"
-            fi
+            ZIP_NAME="test-repo-${{ inputs.version }}-${PLATFORM}.zip"
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
               powershell -Command "Compress-Archive -Path test-repo -DestinationPath $ZIP_NAME"

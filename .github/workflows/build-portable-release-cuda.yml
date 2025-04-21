@@ -106,16 +106,17 @@ jobs:
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
               curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-pc-windows-msvc-install_only.tar.gz
+              PLATFORM="windows"
             else
               # Linux case
               curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz
+              PLATFORM="linux"
             fi
 
             tar -xzf python-build.tar.gz
             mv python test-repo/portable_env
 
-            # Include CUDA version in the ZIP name
-            ZIP_NAME="test-repo-${{ inputs.version }}-${{ matrix.os }}-cuda${{ matrix.cuda }}.zip"
+            ZIP_NAME="test-repo-${{ inputs.version }}-${PLATFORM}-cuda${{ matrix.cuda }}.zip"
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
               powershell -Command "Compress-Archive -Path test-repo -DestinationPath $ZIP_NAME"
