@@ -138,7 +138,7 @@ jobs:
         continue-on-error: true
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ../test-repo-${{ inputs.version }}-${{ matrix.os }}-python${{ matrix.pyver }}-${{ matrix.avx }}.zip
+          file: ../test-repo-${{ inputs.version }}*.zip
           tag: ${{ inputs.version }}
           file_glob: true
           make_latest: false
