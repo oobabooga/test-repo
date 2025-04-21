@@ -75,7 +75,7 @@ jobs:
           Write-Output ('matrix=' + $matrixOut) >> $env:GITHUB_OUTPUT
 
   build_wheels:
-    name: ${{ matrix.os }} ${{ matrix.pyver }} CPU ${{ matrix.avx }}
+    name: ${{ matrix.os }} ${{ matrix.pyver }} CPU ${{ matrix.avx }} CUDA ${{ matrix.cuda }}
     needs: define_matrix
     runs-on: ${{ matrix.os }}
     strategy:
