@@ -1,4 +1,4 @@
-name: Build CPU-only Wheels
+name: Build CUDA
 
 on:
   workflow_dispatch:

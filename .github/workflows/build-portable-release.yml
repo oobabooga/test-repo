@@ -1,4 +1,4 @@
-name: Build CPU-only Wheels
+name: Build CPU and macOS
 
 on:
   workflow_dispatch:
