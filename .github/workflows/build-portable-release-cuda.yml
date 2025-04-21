@@ -128,6 +128,12 @@ jobs:
             echo "Downloading Python for $PLATFORM..."
             curl -L -o python-build.tar.gz "$PYTHON_URL"
             tar -xzf python-build.tar.gz
+
+            if [ ! -d "test-repo" ]; then
+                echo "test-repo not found in current directory, moving up one level"
+                cd ..
+            fi
+
             mv python test-repo/portable_env
 
             # 3. Prepare requirements file based on AVX and CUDA
