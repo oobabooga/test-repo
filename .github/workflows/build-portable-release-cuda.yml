@@ -60,6 +60,7 @@ jobs:
               'os' = @('ubuntu-22.04', 'windows-2019', 'macos-13')
               'pyver' = @("3.11")
               'avx' = @("AVX2")
+              'cuda' = @("11.7", "12.4")
           }
 
           if ($env:CONFIGIN -ne 'Default') {$env:CONFIGIN.split(';').foreach({$matrix[$_.split(':')[0]] = $_.split(':')[1].split(',')})}
