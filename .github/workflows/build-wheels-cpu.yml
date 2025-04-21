@@ -98,23 +98,14 @@ jobs:
           python-version: ${{ matrix.pyver }}
 
       - name: Build Package
+        shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            Remove-Item -Path .github -Recurse -Force -ErrorAction SilentlyContinue
-            cd ..
-            curl.exe -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz
-            tar -xzf python-build.tar.gz
-            Move-Item -Path python -Destination test-repo/portable_env
-            Compress-Archive -Path test-repo -DestinationPath test-repo.zip
-          else
             rm -rf .github
             cd ..
             curl -L -o python-build.tar.gz https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz
             tar -xzf python-build.tar.gz
             mv python test-repo/portable_env
             zip -r test-repo.zip test-repo
-          fi
-        shell: bash
 
       - name: Upload files to a GitHub release
         id: upload-release
