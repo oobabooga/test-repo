@@ -101,6 +101,22 @@ jobs:
       - name: Build Package
         shell: bash
         run: |
+            # Initial state debugging
+            echo "===== INITIAL STATE ====="
+            echo "Current directory: $(pwd)"
+            echo "Directory contents:"
+            ls -la
+            echo "Environment variables:"
+            echo "RUNNER_OS: $RUNNER_OS"
+            
+            # If text-generation-webui exists, see what's in it
+            if [ -d "text-generation-webui" ]; then
+              echo "text-generation-webui exists, contents:"
+              ls -la text-generation-webui
+            else
+              echo "text-generation-webui directory does NOT exist!"
+            fi
+
             rm -rf .github
             cd ..
 
