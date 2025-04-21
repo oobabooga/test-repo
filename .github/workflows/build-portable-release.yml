@@ -100,7 +100,7 @@ jobs:
       - name: Build Package
         shell: bash
         run: |
-            rm -rf .github
+            rm -rf .git
             cd ..
 
             # Define common variables
