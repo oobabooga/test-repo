@@ -167,7 +167,7 @@ jobs:
 
             # 5. Create ZIP file
             cd ..
-            ZIP_NAME="test-repo-${VERSION}-${PLATFORM}.zip"
+            ZIP_NAME="textgen-portable-${VERSION}-${PLATFORM}.zip"
             echo "Creating archive: $ZIP_NAME"
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
