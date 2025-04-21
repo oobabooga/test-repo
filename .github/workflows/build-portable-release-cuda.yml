@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag of text-generation-webui to build: v0.1.0'
+        description: 'Version tag of test-repo to build: v0.1.0'
         default: 'v0.1.0'
         required: true
         type: string
@@ -21,7 +21,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version tag of text-generation-webui to build: v0.1.0'
+        description: 'Version tag of test-repo to build: v0.1.0'
         default: 'v0.1.0'
         required: true
         type: string
@@ -115,7 +115,7 @@ jobs:
                 PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-pc-windows-msvc-install_only.tar.gz"
                 PIP_PATH="portable_env/python/python.exe -m pip"
                 PACKAGES_PATH="portable_env/python/Lib/site-packages"
-                ZIP_CMD="powershell -Command \"Compress-Archive -Path text-generation-webui -DestinationPath"
+                ZIP_CMD="powershell -Command \"Compress-Archive -Path test-repo -DestinationPath"
             else
                 PLATFORM="linux"
                 PYTHON_URL="https://github.com/astral-sh/python-build-standalone/releases/download/20250409/cpython-3.11.12+20250409-x86_64-unknown-linux-gnu-install_only.tar.gz"
@@ -128,7 +128,7 @@ jobs:
             echo "Downloading Python for $PLATFORM..."
             curl -L -o python-build.tar.gz "$PYTHON_URL"
             tar -xzf python-build.tar.gz
-            mv python text-generation-webui/portable_env
+            mv python test-repo/portable_env
 
             # 3. Prepare requirements file based on AVX and CUDA
             if [[ "$AVX_SUPPORT" == "AVX2" ]]; then
@@ -138,7 +138,7 @@ jobs:
             fi
 
             # Create CUDA-specific requirements file if needed
-            cd text-generation-webui
+            cd test-repo
             if [[ "$CUDA_VERSION" == "11.7" ]]; then
                 echo "Creating CUDA 11.7 specific requirements file"
                 sed 's/cu124/cu117/g' "$BASE_REQ_FILE" > requirements_cuda_temp.txt
@@ -158,13 +158,13 @@ jobs:
 
             # 6. Create ZIP file
             cd ..
-            ZIP_NAME="text-generation-webui-${VERSION}-${PLATFORM}-cuda${CUDA_VERSION}.zip"
+            ZIP_NAME="test-repo-${VERSION}-${PLATFORM}-cuda${CUDA_VERSION}.zip"
             echo "Creating archive: $ZIP_NAME"
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
-                powershell -Command "Compress-Archive -Path text-generation-webui -DestinationPath $ZIP_NAME"
+                powershell -Command "Compress-Archive -Path test-repo -DestinationPath $ZIP_NAME"
             else
-                zip -r "$ZIP_NAME" text-generation-webui
+                zip -r "$ZIP_NAME" test-repo
             fi
 
       - name: Upload files to a GitHub release
@@ -173,7 +173,7 @@ jobs:
         continue-on-error: true
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ../text-generation-webui-${{ inputs.version }}*.zip
+          file: ../test-repo-${{ inputs.version }}*.zip
           tag: ${{ inputs.version }}
           file_glob: true
           make_latest: false
