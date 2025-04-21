@@ -49,7 +49,7 @@ jobs:
       run:
         shell: pwsh
     env:
-      ONFIGIN: ${{ inputs.config }}
+      CONFIGIN: ${{ inputs.config }}
       EXCLUDEIN: ${{ inputs.exclude }}
 
     steps:
