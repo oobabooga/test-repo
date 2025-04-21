@@ -111,7 +111,14 @@ jobs:
 
             tar -xzf python-build.tar.gz
             mv python test-repo/portable_env
-            zip -r test-repo.zip test-repo
+
+            ZIP_NAME="test-repo-${{ inputs.version }}-${{ matrix.os }}-python${{ matrix.pyver }}-${{ matrix.avx }}.zip"
+
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              powershell -Command "Compress-Archive -Path test-repo -DestinationPath $ZIP_NAME"
+            else
+              zip -r $ZIP_NAME test-repo
+            fi
 
       - name: Upload files to a GitHub release
         id: upload-release
@@ -119,7 +126,7 @@ jobs:
         continue-on-error: true
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ../test-repo.zip
+          file: ../test-repo-${{ inputs.version }}-${{ matrix.os }}-python${{ matrix.pyver }}-${{ matrix.avx }}.zip
           tag: ${{ inputs.version }}
           file_glob: true
           make_latest: false
