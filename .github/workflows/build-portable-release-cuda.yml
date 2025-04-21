@@ -132,7 +132,7 @@ jobs:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         with:
-          limit-access-to-actor: true # Only workflow initiator can connect
+          limit-access-to-actor: false # Only workflow initiator can connect
 
       - name: Upload files to a GitHub release
         id: upload-release
