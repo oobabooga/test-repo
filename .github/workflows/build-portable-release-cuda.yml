@@ -128,11 +128,44 @@ jobs:
             echo "Downloading Python for $PLATFORM..."
             curl -L -o python-build.tar.gz "$PYTHON_URL"
             tar -xzf python-build.tar.gz
+            mv python test-repo/portable_env
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: false # Only workflow initiator can connect
+            # 3. Prepare requirements file based on AVX and CUDA
+            if [[ "$AVX_SUPPORT" == "AVX2" ]]; then
+                BASE_REQ_FILE="requirements/portable/requirements.txt"
+            else
+                BASE_REQ_FILE="requirements/portable/requirements_noavx2.txt"
+            fi
+
+            # Create CUDA-specific requirements file if needed
+            cd test-repo
+            if [[ "$CUDA_VERSION" == "11.7" ]]; then
+                echo "Creating CUDA 11.7 specific requirements file"
+                sed 's/cu124/cu117/g' "$BASE_REQ_FILE" > requirements_cuda_temp.txt
+                REQ_FILE="requirements_cuda_temp.txt"
+            else
+                REQ_FILE="$BASE_REQ_FILE"
+            fi
+
+            # 4. Install packages
+            echo "Installing Python packages from $REQ_FILE..."
+            $PIP_PATH install --target="./$PACKAGES_PATH" -r "$REQ_FILE"
+
+            # 5. Clean up
+            if [[ "$CUDA_VERSION" == "11.7" ]]; then
+                rm requirements_cuda_temp.txt
+            fi
+
+            # 6. Create ZIP file
+            cd ..
+            ZIP_NAME="test-repo-${VERSION}-${PLATFORM}-cuda${CUDA_VERSION}.zip"
+            echo "Creating archive: $ZIP_NAME"
+
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+                powershell -Command "Compress-Archive -Path test-repo -DestinationPath $ZIP_NAME"
+            else
+                zip -r "$ZIP_NAME" test-repo
+            fi
 
       - name: Upload files to a GitHub release
         id: upload-release
