@@ -12,7 +12,7 @@ on:
 permissions:
   contents: write
 
-jobs:          
+jobs:
   build_release_cuda_windows:
     name: CUDA Windows
     uses: ./.github/workflows/build-portable-release-cuda.yml
@@ -42,8 +42,8 @@ jobs:
       config: 'os:ubuntu-22.04'
 
   build_release_macos:
-    name: macOS 
+    name: macOS
     uses: ./.github/workflows/build-portable-release.yml
     with:
       version: ${{ inputs.version }}
-      config: 'os:macos-13'
+      config: 'os:macos-13,macos-14'
