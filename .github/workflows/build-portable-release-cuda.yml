@@ -93,7 +93,6 @@ jobs:
           repository: 'oobabooga/text-generation-webui'
           ref: ${{ inputs.version }}
           submodules: 'recursive'
-          path: 'text-generation-webui'
 
       - uses: actions/setup-python@v4
         with:
