@@ -100,7 +100,13 @@ jobs:
       - name: Build Package
         shell: bash
         run: |
-            rm -rf .git cmd* update_wizard* Colab-TextGen-GPU.ipynb docker
+            VERSION_CLEAN="${VERSION#v}"
+            FOLDER_NAME="text-generation-webui-${VERSION_CLEAN}"
+            cd ..
+            cp -r text-generation-webui $FOLDER_NAME
+            cd $FOLDER_NAME
+
+            rm -rf .git cmd* update_wizard* Colab-TextGen-GPU.ipynb docker setup.cfg
             allowed=("character_bias" "gallery" "openai" "sd_api_pictures")
             find extensions/ -mindepth 1 -maxdepth 1 -type d | grep -v -E "$(printf '%s|' "${allowed[@]}" | sed 's/|$//')" | xargs rm -rf
 
@@ -172,14 +178,13 @@ jobs:
 
             # 5. Create ZIP file
             cd ..
-            VERSION_CLEAN="${VERSION#v}"
             ZIP_NAME="textgen-portable-${VERSION_CLEAN}-${PLATFORM}.zip"
             echo "Creating archive: $ZIP_NAME"
 
             if [[ "$RUNNER_OS" == "Windows" ]]; then
-                powershell -Command "Compress-Archive -Path text-generation-webui -DestinationPath $ZIP_NAME"
+                powershell -Command "Compress-Archive -Path $FOLDER_NAME -DestinationPath $ZIP_NAME"
             else
-                zip -r "$ZIP_NAME" text-generation-webui
+                zip -r "$ZIP_NAME" "$FOLDER_NAME"
             fi
 
       - name: Upload files to a GitHub release
