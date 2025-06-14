@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag of text-generation-webui to build: v3.0'
+        description: 'Version tag of test-repo to build: v3.0'
         default: 'v3.0'
         required: true
         type: string
@@ -21,7 +21,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version tag of text-generation-webui to build: v3.0'
+        description: 'Version tag of test-repo to build: v3.0'
         default: 'v3.0'
         required: true
         type: string
@@ -89,7 +89,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: 'oobabooga/text-generation-webui'
+          repository: 'oobabooga/test-repo'
           ref: ${{ inputs.version }}
           submodules: 'recursive'
 
@@ -101,9 +101,9 @@ jobs:
         shell: bash
         run: |
             VERSION_CLEAN="${VERSION#v}"
-            FOLDER_NAME="text-generation-webui-${VERSION_CLEAN}"
+            FOLDER_NAME="test-repo-${VERSION_CLEAN}"
             cd ..
-            cp -r text-generation-webui $FOLDER_NAME
+            cp -r test-repo $FOLDER_NAME
             cd $FOLDER_NAME
 
             rm -rf .git cmd* update_wizard* Colab-TextGen-GPU.ipynb docker setup.cfg
